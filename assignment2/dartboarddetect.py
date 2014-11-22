@@ -1,15 +1,8 @@
-#! /usr/bin/python
-
-# This example shows the simplest way of getting an image from the robot's camera. The image
-# is an OpenCV image so we also show how to perform edge detection on the image
-
-#some code is based on: http://blog.derivatived.com/posts/OpenCV-Tutorial-on-Face-Tracking-Raspberry-PI-Camera/
-
 import time
 import argparse
 import cv2
-#import py_websockets_bot
 import numpy as np
+
 
 #---------------------------------------------------------------------------------------------------        
 #if __name__ == "__main__":
@@ -17,11 +10,10 @@ def main():
     #video_source = cv2.VideoCapture(0)
 
     #select cascade library
-    face_cascade = cv2.CascadeClassifier('cascade_resources/haarcascade_dartcascade.xml')
-
+    detect_cascade = cv2.CascadeClassifier('cascade_resources/dartcascade.xml')
 
     #name of image
-    filename = 'coins1.png'
+    filename = 'testsamples/dart0.jpg'
     #array to store details of the image
     filenamearray = filename.split('.')
 
@@ -30,7 +22,8 @@ def main():
     # Convert to grayscale
     im_gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-    detect = face_cascade.detectMultiScale(im_gray, 1.3, 5)
+    detect = detect_cascade.detectMultiScale(im_gray, 1.1, 1, cv2.cv.CV_HAAR_SCALE_IMAGE, (50, 50), (500,500) )
+    print detect
     detect_center=[]
     for (x,y,w,h) in detect:
         cv2.rectangle(im,(x,y),(x+w,y+h),(255,0,0),2)
@@ -46,16 +39,10 @@ def main():
     cv2.imshow( "Image", im )
 
     #check if user presses a key
-    key = cv2.waitKey(10)
+    key = cv2.waitKey(0)
     if key > 0:
         #print key
-        #if key == 1113937:
-            #bot.set_motor_speeds(-80.0,80.0)
-        face_cascade = cascade_choice(key)
-        #bot.set_motor_speeds(-80.0,80.0) #spin left
         if key == 1048603:
-            # Disconnect from the robot
-            bot.disconnect()
             exit(0)
 
 main()
