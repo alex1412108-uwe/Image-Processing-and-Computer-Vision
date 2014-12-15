@@ -29,12 +29,12 @@ def main():
 
 		results_list = compute_regions(region_list, region_list_past)
 
-		print results_list
+		vector_list = compute_lk(results_list)
 
-		for i in range(0,len(results_list)):
-			cv2.imshow(str(i) + 'ix', results_list[i][0])
-			cv2.imshow(str(i) + 'iy', results_list[i][1])
-			cv2.imshow(str(i) + 'it', results_list[i][2])
+		#for i in range(0,len(results_list)):
+			#cv2.imshow(str(i) + 'ix', results_list[i][0])
+			#cv2.imshow(str(i) + 'iy', results_list[i][1])
+			#cv2.imshow(str(i) + 'it', results_list[i][2])
 
 		#cv2.imshow('image', im)
 		#cv2.imshow('image past', im_past)
@@ -116,9 +116,9 @@ def find_values3(im, im_past):
 	array_spacial = []
 	array_spacial_past = []
 
-	array_ix = np.zeros((rows,cols), np.uint8)
-	array_iy = np.zeros((rows,cols), np.uint8)
-	array_it = np.zeros((rows,cols), np.uint8)
+	array_ix = np.zeros((rows-1,cols-1), np.uint8)
+	array_iy = np.zeros((rows-1,cols-1), np.uint8)
+	array_it = np.zeros((rows-1,cols-1), np.uint8)
 
 	for i in xrange(0,rows-1):
 
@@ -130,6 +130,7 @@ def find_values3(im, im_past):
 			array_ix[i][j] = ((array_spacial[1] - array_spacial[0]) + (array_spacial[3] - array_spacial[2]) + (array_spacial_past[1] - array_spacial_past[0]) + (array_spacial_past[3] - array_spacial_past[2]))/4
 			array_iy[i][j] = ((array_spacial[2] - array_spacial[0]) + (array_spacial[3] - array_spacial[1]) + (array_spacial_past[2] - array_spacial_past[0]) + (array_spacial_past[3] - array_spacial_past[1]))/4
 			array_it[i][j] = ((array_spacial[0] - array_spacial_past[0])+(array_spacial[1] - array_spacial_past[1])+(array_spacial[2] - array_spacial_past[2])+(array_spacial[3] - array_spacial_past[3]))/4
+
 	return array_ix, array_iy, array_it
 
 def regions(im, regions_to_detect, region_size):
@@ -142,11 +143,30 @@ def regions(im, regions_to_detect, region_size):
 	return region_list
 
 def compute_regions(region_list, region_list_past):
-	results_list = np.empty((3,len(region_list),len(region_list[0]),len(region_list[0][0])),np.uint8)
+	results_list = np.empty((3,len(region_list),len(region_list[0])-1,len(region_list[0][0])-1),np.uint8)
 	for i in range(0,len(region_list)):
 		array_ix, array_iy, array_it = find_values3(region_list[i], region_list_past[i])
 		results_list[i] = [array_ix, array_iy, array_it]
 
 	return results_list
+
+def compute_lk(results_list):
+	print results_list
+	vector_list = np.empty((len(results_list),1,2),np.uint8)
+	for i in range(0,len(results_list)):
+		ix = results_list[i][0]
+		iy = results_list[i][1]
+		it = results_list[i][2]
+
+		A = np.array([[np.dot(ix, ix), np.dot(ix, iy)], [np.dot(ix, iy), np.dot(iy, iy)]])
+		b = [[-1 * np.dot(ix, it)], [-1 * np.dot(iy, it)]]
+		#calculate inverse of A
+		#print A
+		Ainv = np.linalg.inv(A)
+		#calculate product of inverse of A and b
+		v = np.dot(Ainv, b)
+
+		vector_list[i] = v
+	#print vector_list
 
 main()
