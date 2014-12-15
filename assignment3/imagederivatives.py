@@ -14,18 +14,22 @@ def main():
 	#ret = video_source.set(3,1920) #set width
 	#ret = video_source.set(4,1080) #set height
 	regions_to_detect = [[200,200],[100,300],[50,50]]
-	region_size = [5,5]
+	region_size = [3,3]
 
 	im = setup(video_source)
 	im = cleanup(im)
+	region_list = regions(im, regions_to_detect, region_size)
 
 	while True:
+		region_list_past = region_list.copy()
+
 		im, im_past = running_cleanup(video_source, im)
 
 		region_list = regions(im, regions_to_detect, region_size)
 
-		#array_ix, array_iy, array_it = find_values3(im, im_past)
+		results_list = compute_regions(region_list, region_list_past)
 
+		#for i in range(0,)
 		#cv2.imshow('image', im)
 		#cv2.imshow('image past', im_past)
 		#cv2.imshow('ix', array_ix)
@@ -128,7 +132,14 @@ def regions(im, regions_to_detect, region_size):
 		region_individual = im[regions_to_detect[i][0]:regions_to_detect[i][0] + region_size[0], regions_to_detect[i][1]:regions_to_detect[i][1] + region_size[1]]
 		region_list[i] = region_individual
 
-	print region_list
-	#return region_list
+	return region_list
+
+def compute_regions(region_list, region_list_past):
+	results_list = np.empty((3,len(region_list),len(region_list[0]),len(region_list[0][0])),np.uint8)
+	for i in range(0,len(region_list)):
+		array_ix, array_iy, array_it = find_values3(region_list[i], region_list_past[i])
+		results_list[i] = [array_ix, array_iy, array_it]
+
+	return results_list
 
 main()
