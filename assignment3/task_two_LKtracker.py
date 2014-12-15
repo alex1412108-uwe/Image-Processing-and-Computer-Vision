@@ -6,7 +6,7 @@ import math
 from matplotlib import pyplot as plt
 
 def main():
-	video_feed = 'resources/3.avi'
+	video_feed = 'resources/2.mov'
 	#video_feed = 'testvideos/seed_tape_model_semiloose2.mkv'
 
 	video_source=cv2.VideoCapture(video_feed)
@@ -51,12 +51,20 @@ def main():
 			cv2.line(im, (regions_to_detect[i][0], regions_to_detect[i][1]), (regions_to_detect[i][0] + vector_list[i][0][0], regions_to_detect[i][1] + vector_list[i][1][0]),(255,0,0))
 
 
+		aspect_multiplier = float(rows)/cols
+
+		print aspect_multiplier
+
+		im_resize = cv2.resize(im, (1200,int(1200 * aspect_multiplier)))#, fx=2, fy=2)
+
 		cv2.imshow('image', im)
-		cv2.imshow('image past', im_past)
+		cv2.imshow('image_large', im_resize)
+		#cv2.imshow('image past', im_past)
 		#cv2.imshow('ix', array_ix)
 		#cv2.imshow('iy', array_iy)
 		#cv2.imshow('it', array_it)
-
+		cv2.waitKey(0)
+		exit(0)
 		key = cv2.waitKey(20)
 		if key > 0:
 			if key==1048603: #escape key
@@ -184,7 +192,6 @@ def compute_lk(results_list):
 			#print "singularity at coordinate pair " + str(i+1)
 			v = np.array([[0],[0]])
 
-		print v[0]
 
 		#clean out extreme to reduce noise.
 		if v[0] > 250:
